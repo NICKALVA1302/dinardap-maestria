@@ -1,0 +1,96 @@
+{
+  "info": {
+    "name": "API DINARDAP - Sandbox",
+    "description": "Colección Postman para probar endpoints DINARDAP (Ministerio de Gobierno) - incluye request para obtener token y ejemplos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Obtener token (Client Credentials)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "grant_type", "value": "client_credentials", "type": "text" },
+            { "key": "client_id", "value": "test_client", "type": "text" },
+            { "key": "client_secret", "value": "secret123", "type": "text" }
+          ]
+        },
+        "url": "{{baseUrl}}/oauth/token"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const json = pm.response.json();",
+              "  pm.environment.set('access_token', json.access_token);",
+              "  console.log('Token guardado en variable de entorno access_token');",
+              "} else {",
+              "  console.log('No se pudo obtener token: ' + pm.response.text());",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Consulta ciudadano (ejemplo)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{access_token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/dinardap/consulta-ciudadano/0102030405",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "v1", "dinardap", "consulta-ciudadano", "0102030405" ]
+        }
+      }
+    },
+    {
+      "name": "Validación identidad (ejemplo)",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+        "url": "{{baseUrl}}/api/v1/dinardap/validacion-identidad/0102030405"
+      }
+    },
+    {
+      "name": "Auditoría (ejemplo)",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/dinardap/auditoria?fechaInicio=2025-10-31&fechaFin=2025-10-31&cedula=0102030405&page=1&limit=50",
+          "query": [
+            { "key": "fechaInicio", "value": "2025-10-31" },
+            { "key": "fechaFin", "value": "2025-10-31" },
+            { "key": "cedula", "value": "0102030405" },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "50" }
+          ],
+          "url": "{{baseUrl}}/api/v1/dinardap/auditoria"
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "access_token", "value": "" }
+  ]
+}

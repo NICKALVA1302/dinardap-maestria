@@ -1,0 +1,387 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API DINARDAP - Ministerio de Gobierno (Sandbox)",
+    "version": "1.0.0",
+    "description": "API para consulta y validación de identidad ciudadana. Entorno sandbox."
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local sandbox" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Citizen": {
+        "type": "object",
+        "properties": {
+          "cedula": { "type": "string", "example": "0102030405" },
+          "nombre": { "type": "string", "example": "Juan Perez" },
+          "estadocivil": { "type": "string", "example": "SOLTERO" },
+          "fechaexpedicion": { "type": "string", "example": "2010-05-12" },
+          "fechanacimiento": { "type": "string", "example": "1985-04-10" },
+          "instruccion": { "type": "string", "example": "UNIVERSITARIA" },
+          "nacionalidad": { "type": "string", "example": "ECUATORIANA" },
+          "profesion": { "type": "string", "example": "Ingeniero" },
+          "lugarnacimiento": { "type": "string", "example": "Quito" },
+          "domicilio": { "type": "string", "example": "Av. Example 123" },
+          "estado": { "type": "string", "example": "ACTIVA" }
+        }
+      },
+      "ValidationResponse": {
+        "type": "object",
+        "properties": {
+          "cedula": { "type": "string", "example": "0102030405" },
+          "valida": { "type": "boolean", "example": true },
+          "nombre": { "type": "string", "example": "Juan Perez" },
+          "estado": { "type": "string", "example": "ACTIVA" },
+          "fechaValidacion": { "type": "string", "format": "date-time", "example": "2025-10-31T10:30:00Z" },
+          "motivo": { "type": "string", "example": "Cédula no registrada o inactiva" }
+        }
+      },
+      "AuditRecord": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "615c1f1f1f1f1f1f1f1f1f1f" },
+          "usuario": { "type": "string", "example": "test_client" },
+          "cedula": { "type": "string", "example": "0102030405" },
+          "endpoint": { "type": "string", "example": "/api/v1/dinardap/consulta-ciudadano" },
+          "metodo": { "type": "string", "example": "GET" },
+          "fechaHora": { "type": "string", "format": "date-time", "example": "2025-10-31T10:30:00Z" },
+          "ipOrigen": { "type": "string", "example": "127.0.0.1" },
+          "exitoso": { "type": "boolean", "example": true },
+          "metadata": { "type": "object" }
+        }
+      },
+      "AuditPagination": {
+        "type": "object",
+        "properties": {
+          "paginaActual": { "type": "integer", "example": 1 },
+          "totalPaginas": { "type": "integer", "example": 1 },
+          "totalRegistros": { "type": "integer", "example": 2 },
+          "registrosPorPagina": { "type": "integer", "example": 50 }
+        }
+      },
+      "AuditResponse": {
+        "type": "object",
+        "properties": {
+          "registros": { "type": "array", "items": { "$ref": "#/components/schemas/AuditRecord" } },
+          "paginacion": { "$ref": "#/components/schemas/AuditPagination" }
+        }
+      },
+      "OAuthToken": {
+        "type": "object",
+        "properties": {
+          "access_token": { "type": "string", "example": "eyJhbGciOi..." },
+          "token_type": { "type": "string", "example": "Bearer" },
+          "expires_in": { "type": "integer", "example": 7200 }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Token inválido o expirado" }
+        }
+      }
+    }
+  },
+  "security": [ { "bearerAuth": [] } ],
+  "paths": {
+    "/oauth/token": {
+      "post": {
+        "summary": "Obtener token (Client Credentials - sandbox)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "grant_type": { "type": "string", "example": "client_credentials" },
+                  "client_id": { "type": "string", "example": "test_client" },
+                  "client_secret": { "type": "string", "example": "secret123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token emitido",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OAuthToken" },
+                "examples": {
+                  "success": {
+                    "summary": "Ejemplo token",
+                    "value": {
+                      "access_token": "eyJhbGciOi...",
+                      "token_type": "Bearer",
+                      "expires_in": 7200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid client",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dinardap/consulta-ciudadano/{cedula}": {
+      "get": {
+        "summary": "Consulta información del ciudadano por cédula",
+        "parameters": [
+          { "name": "cedula", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Información obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "$ref": "#/components/schemas/Citizen" }
+                  }
+                },
+                "examples": {
+                  "ejemplo": {
+                    "summary": "Ejemplo respuesta",
+                    "value": {
+                      "success": true,
+                      "message": "Información obtenida exitosamente",
+                      "data": {
+                        "cedula": "0102030405",
+                        "nombre": "Juan Perez",
+                        "estadocivil": "SOLTERO",
+                        "estado": "ACTIVA"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cédula no encontrada",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "notfound": {
+                    "summary": "No encontrada",
+                    "value": {
+                      "success": false,
+                      "message": "Cédula no encontrada en el registro"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido o expirado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dinardap/validacion-identidad/{cedula}": {
+      "get": {
+        "summary": "Validación rápida de identidad",
+        "parameters": [
+          { "name": "cedula", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Validación completada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "$ref": "#/components/schemas/ValidationResponse" }
+                  }
+                },
+                "examples": {
+                  "valida": {
+                    "summary": "Cédula válida",
+                    "value": {
+                      "success": true,
+                      "message": "Validación completada exitosamente",
+                      "data": {
+                        "cedula": "0102030405",
+                        "valida": true,
+                        "nombre": "Juan Perez",
+                        "estado": "ACTIVA",
+                        "fechaValidacion": "2025-10-31T10:30:00Z"
+                      }
+                    }
+                  },
+                  "novalida": {
+                    "summary": "Cédula inválida",
+                    "value": {
+                      "success": true,
+                      "message": "Validación completada",
+                      "data": {
+                        "cedula": "9999999999",
+                        "valida": false,
+                        "motivo": "Cédula no registrada o inactiva"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido o expirado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dinardap/auditoria": {
+      "get": {
+        "summary": "Obtener registros de auditoría",
+        "parameters": [
+          {
+            "name": "fechaInicio",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" },
+            "description": "Fecha inicio (ISO YYYY-MM-DD o DD/MM/YYYY). Ejemplo: 2025-10-31",
+            "example": "2025-10-31"
+          },
+          {
+            "name": "fechaFin",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" },
+            "description": "Fecha fin (ISO YYYY-MM-DD o DD/MM/YYYY). Ejemplo: 2025-10-31",
+            "example": "2025-10-31"
+          },
+          { "name": "cedula", "in": "query", "schema": { "type": "string" } },
+          { "name": "usuario", "in": "query", "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } }
+        ],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Auditoría obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "$ref": "#/components/schemas/AuditResponse" }
+                  }
+                },
+                "examples": {
+                  "ejemplo": {
+                    "summary": "Ejemplo auditoría",
+                    "value": {
+                      "success": true,
+                      "message": "Auditoría obtenida exitosamente",
+                      "data": {
+                        "registros": [
+                          {
+                            "id": "615c1f1f1f1f1f1f1f1f1f1f",
+                            "usuario": "test_client",
+                            "cedula": "0102030405",
+                            "endpoint": "/api/v1/dinardap/consulta-ciudadano",
+                            "metodo": "GET",
+                            "fechaHora": "2025-10-31T10:30:00Z",
+                            "ipOrigen": "127.0.0.1",
+                            "exitoso": true,
+                            "metadata": {}
+                          }
+                        ],
+                        "paginacion": {
+                          "paginaActual": 1,
+                          "totalPaginas": 1,
+                          "totalRegistros": 1,
+                          "registrosPorPagina": 50
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de fecha inválido. Use YYYY-MM-DD o DD/MM/YYYY",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "badformat": {
+                    "summary": "Fecha inválida",
+                    "value": {
+                      "success": false,
+                      "message": "fechaInicio tiene un formato inválido. Use YYYY-MM-DD o DD/MM/YYYY"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido o expirado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "No tiene permisos para acceder a la auditoría",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

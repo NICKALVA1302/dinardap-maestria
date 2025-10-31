@@ -1,0 +1,16 @@
+GENERAR TOKEN
+
+curl -X POST "http://localhost:3000/oauth/token" -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=client_credentials&client_id=test_client&client_secret=secret123"
+
+DOCUMENTACIÓN DEL API
+http://localhost:3000/docs
+
+En la base solo está mi cédula, hagan la llamada con mi cédula
+
+0928239235
+
+Si quieren ignresar su info ponganla en sandboxSeed y hagan un 
+
+npm run seed:sandbox
+
+Poner la ip del AWS en .env separado por coma del localhost (127.0.0.1)
