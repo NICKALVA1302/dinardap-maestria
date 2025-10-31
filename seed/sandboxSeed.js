@@ -23,16 +23,29 @@ async function seed() {
       estado: 'ACTIVA'
     },
     {
+      cedula: '0967285770',
+      nombre: 'HERRERA PÉREZ STEVEN ALBERTO',
+      estadocivil: 'SOLTERO',
+      fechaexpedicion: '2020-02-01',
+      fechanacimiento: '1998-09-09',
+      instruccion: 'UNIVERSITARIA',
+      nacionalidad: 'ECUATORIANA',
+      profesion: 'INGENIERO EN SISTEMAS',
+      lugarnacimiento: 'GUAYAQUIL',
+      domicilio: 'SUBURBIO DE GUAYAQUIL',
+      estado: 'ACTIVA'
+    },
+    {
       cedula: '0908070605',
-      nombre: 'María Gomez',
+      nombre: 'GOMEZ RODRIGUEZ MARIA FERNANDA',
       estadocivil: 'CASADO',
       fechaexpedicion: '2012-02-01',
       fechanacimiento: '1990-07-20',
       instruccion: 'TECNICA',
       nacionalidad: 'ECUATORIANA',
-      profesion: 'Enfermera',
-      lugarnacimiento: 'Guayaquil',
-      domicilio: 'Calle Falsa 456',
+      profesion: 'ENFERMERA',
+      lugarnacimiento: 'GUAYAQUIL',
+      domicilio: 'CALLE FALSA 456',
       estado: 'ACTIVA'
     }
   ];
