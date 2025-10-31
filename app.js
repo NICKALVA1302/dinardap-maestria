@@ -8,6 +8,7 @@ const { authMiddleware } = require('./middleware/auth');
 const dinardapRoutes = require('./routes/dinardap');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./docs/swagger.json');
+const expressGraphqlHTTP = require('express-graphql');
 
 const app = express();
 app.set('trust proxy', true); // Para AWS ALB/CloudFront: usar X-Forwarded-For
@@ -15,6 +16,12 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const schema = require ('./graphql/schema.js');
+app.use('/graphql',expressGraphqlHTTP.graphqlHTTP({
+  graphiql:true,
+  schema:schema
+}));
 
 app.post('/oauth/token', (req, res) => {
   const grant_type = req.body.grant_type || req.query.grant_type;
