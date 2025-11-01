@@ -6,6 +6,7 @@
     "description": "API para consulta y validación de identidad ciudadana. Entorno sandbox."
   },
   "servers": [
+    { "url": "http://54.175.243.7:3000", "description": "Production server" },
     { "url": "http://localhost:3000", "description": "Local sandbox" }
   ],
   "components": {
