@@ -11,7 +11,9 @@ const swaggerDocument = require('./docs/swagger.json');
 const expressGraphqlHTTP = require('express-graphql');
 
 const app = express();
-app.set('trust proxy', true); // Para AWS ALB/CloudFront: usar X-Forwarded-For
+// Pruebas app.set('trust proxy', true); // Para AWS ALB/CloudFront: usar X-Forwarded-For
+//Prod
+app.set('x-forwarded-for', true);
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
