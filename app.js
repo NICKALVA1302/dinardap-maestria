@@ -14,7 +14,10 @@ const app = express();
 // Pruebas app.set('trust proxy', true); // Para AWS ALB/CloudFront: usar X-Forwarded-For
 //Prod
 app.set('x-forwarded-for', true);
-app.use(helmet());
+app.use(helmet({
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
+  originAgentCluster: false
+}));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
