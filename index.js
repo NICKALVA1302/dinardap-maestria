@@ -8,7 +8,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
   .then(() => {
     console.log('Conectado a la base de datos MongoDB');
     const port = process.env.PORT || 3000;
-    app.listen(port, () => console.log(`Servidor escuchando en el puerto ${port}`));
+    app.listen(port, '0.0.0.0', () => console.log(`Servidor escuchando en el puerto ${port}`));
   })
   .catch(err => {
     console.error('Error de conexión a MongoDB:', err);
